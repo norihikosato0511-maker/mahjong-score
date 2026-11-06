@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>麻雀点数計算</title>
+
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:15px;
+    background:#111;
+    color:#fff;
+    font-family:sans-serif;
+    max-width:800px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    color:gold;
+}
+
+h2{
+    color:gold;
+    margin-top:0;
+}
+
+.card{
+    background:#222;
+    border:2px solid gold;
+    border-radius:12px;
+    padding:20px;
+    margin-bottom:15px;
+}
+
+label{
+    display:block;
+    width:100%;
+    margin-bottom:12px;
+    font-weight:bold;
+}
+
+input,
+select{
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    padding:12px;
+    margin-top:6px;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    background:white;
+    color:black;
+}
+
+input[type="number"]{
+    appearance:textfield;
+    -moz-appearance:textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button{
+    opacity:1;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:10px;
+    background:gold;
+    color:black;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:0.9;
+}
+
+#result{
+    margin-top:20px;
+    padding:20px;
+    background:#222;
+    border:2px solid gold;
+    border-radius:12px;
+    text-align:center;
+}
+
+.score{
+    font-size:32px;
+    color:gold;
+    font-weight:bold;
+}
+
+.rank{
+    font-size:24px;
+    margin-top:10px;
+    color:#ffcc00;
+}
+
+@media (max-width:600px){
+
+    body{
+        padding:10px;
+    }
+
+    .card{
+        padding:15px;
+    }
+
+    input,
+    select{
+        font-size:16px;
+    }
+
+    .score{
+        font-size:28px;
+    }
+}
+
+.help{
+    display:block;
+    font-size:11px;
+    color:#9ca3af;
+    line-height:1.4;
+    margin:2px 0 6px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>🀄 麻雀点数計算</h1>
+
+<div class="card">
+
+<label>
+特殊形
+<select id="special">
+<option value="normal">通常手</option>
+<option value="pinfu">平和</option>
+<option value="chitoi">七対子</option>
+</select>
+</label>
+
+<label>
+アガリ
+<select id="agari">
+<option value="ron">ロン</option>
+<option value="tsumo">ツモ</option>
+</select>
+</label>
+
+<label>
+親子
+<select id="oya">
+<option value="ko">子</option>
+<option value="oya">親</option>
+</select>
+</label>
+
+<label>
+翻数
+<input type="number" id="han" value="1" min="1">
+</label>
+
+<label>
+ドラ
+<input type="number" id="dora" value="0" min="0">
+</label>
+
+<label>
+雀頭
+<select id="pair">
+<option value="0">非役牌</option>
+<option value="2">役牌</option>
+</select>
+</label>
+
+<label>
+待ち
+<select id="wait">
+<option value="0">両面・シャンポン</option>
+<option value="2">単騎・カンチャン・ペンチャン</option>
+</select>
+</label>
+
+</div>
+
+<div class="card">
+
+<h2>面子（刻子・槓子）</h2>
+<h2>雀頭（対子）</h2>
+<h2>待ち形</h2>
+
+<label>
+  中張牌 明刻 (2符)
+  <span class="help">ポンした2〜8の数牌の3枚組</span>
+  <input type="number" id="minko2">
+</label>
+
+<label>么九牌 明刻(4符)
+  <span class="help">ポンした1・9・字牌の3枚組</span>
+  <input type="number" id="minko4" value="0" min="0">
+</label>
+
+<label>中張牌 暗刻(4符)
+  <span class="help">自力で揃えた2〜8の数牌の3枚組</span>
+  <input type="number" id="anko4" value="0" min="0">
+</label>
+
+<label>么九牌 暗刻(8符)
+  <span class="help">自力で揃えた1・9・字牌の3枚組</span>
+  <input type="number" id="anko8" value="0" min="0">
+</label>
+
+<label>中張牌 明槓(8符)
+  <span class="help">鳴いて作った2〜8の数牌の4枚組</span>
+  <input type="number" id="minkan8" value="0" min="0">
+</label>
+
+<label>么九牌 明槓(16符)
+  <span class="help">鳴いて作った1・9・字牌の4枚組</span>
+  <input type="number" id="minkan16" value="0" min="0">
+</label>
+
+<label>中張牌 暗槓(16符)
+  <span class="help">自力で揃えた2〜8の数牌の4枚組</span>
+  <input type="number" id="ankan16" value="0" min="0">
+</label>
+
+<label>么九牌 暗槓(32符)
+  <span class="help">自力で揃えた1・9・字牌の4枚組</span>
+  <input type="number" id="ankan32" value="0" min="0">
+</label>
+
+</div>
+
+<button onclick="calculate()">
+計算
+</button>
+
+<div id="result">
+計算待ち
+</div>
+
+<script>
+
+function calcFu(){
+
+    const special =
+    document.getElementById("special").value;
+
+    const agari =
+    document.getElementById("agari").value;
+
+    if(special==="chitoi"){
+        return 25;
+    }
+
+    if(special==="pinfu"){
+        return agari==="tsumo" ? 20 : 30;
+    }
+
+    let fu=20;
+
+    if(agari==="ron"){
+        fu+=10;
+    }else{
+        fu+=2;
+    }
+
+    fu+=Number(document.getElementById("pair").value);
+    fu+=Number(document.getElementById("wait").value);
+
+    fu+=Number(document.getElementById("minko2").value)*2;
+    fu+=Number(document.getElementById("minko4").value)*4;
+
+    fu+=Number(document.getElementById("anko4").value)*4;
+    fu+=Number(document.getElementById("anko8").value)*8;
+
+    fu+=Number(document.getElementById("minkan8").value)*8;
+    fu+=Number(document.getElementById("minkan16").value)*16;
+
+    fu+=Number(document.getElementById("ankan16").value)*16;
+    fu+=Number(document.getElementById("ankan32").value)*32;
+
+    return Math.ceil(fu/10)*10;
+}
+
+function calculate(){
+
+    const fu=calcFu();
+
+    let han=
+    Number(document.getElementById("han").value);
+
+    han+=Number(
+    document.getElementById("dora").value
+    );
+
+    let rank="";
+    let base;
+
+    if(han>=13){
+        rank="役満";
+        base=8000;
+    }
+    else if(han>=11){
+        rank="三倍満";
+        base=6000;
+    }
+    else if(han>=8){
+        rank="倍満";
+        base=4000;
+    }
+    else if(han>=6){
+        rank="跳満";
+        base=3000;
+    }
+    else if(
+        han>=5 ||
+        (han===4&&fu>=40) ||
+        (han===3&&fu>=70)
+    ){
+        rank="満貫";
+        base=2000;
+    }
+    else{
+        base=
+        fu*Math.pow(2,han+2);
+    }
+
+    const agari=
+    document.getElementById("agari").value;
+
+    const oya=
+    document.getElementById("oya").value;
+
+    let html="";
+
+    if(agari==="ron"){
+
+        const point=
+        Math.ceil(
+        base*(oya==="oya"?6:4)/100
+        )*100;
+
+        html=`
+        <div class="score">
+        ${point.toLocaleString()}点
+        </div>
+
+        <div class="rank">
+        ${rank}
+        </div>
+
+        <p>${fu}符 ${han}翻</p>
+        `;
+
+    }else{
+
+        if(oya==="oya"){
+
+            const pay=
+            Math.ceil(base*2/100)*100;
+
+            html=`
+            <div class="score">
+            ${pay.toLocaleString()}オール
+            </div>
+
+            <div class="rank">
+            ${rank}
+            </div>
+
+            <p>${fu}符 ${han}翻</p>
+            `;
+
+        }else{
+
+            const child=
+            Math.ceil(base/100)*100;
+
+            const parent=
+            Math.ceil(base*2/100)*100;
+
+            html=`
+            <div class="score">
+            ${child}/${parent}
+            </div>
+
+            <div class="rank">
+            ${rank}
+            </div>
+
+            <p>${fu}符 ${han}翻</p>
+            <p>子/親</p>
+            `;
+        }
+    }
+
+    document.getElementById("result").innerHTML = html;
+}
+
+if("serviceWorker" in navigator){
+
+window.addEventListener("load",()=>{
+
+navigator.serviceWorker.register(
+"./service-worker.js"
+);
+
+});
+
+}
+</script>
+
+</body>
+</html>
